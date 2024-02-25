@@ -1,0 +1,201 @@
+drop database if exists ocpizza;
+create database ocpizza;
+
+use ocpizza;
+
+
+
+CREATE TABLE client
+(
+    clientID INT,
+    name varchar(50),
+    firstName varchar(50),
+    billingAdress varchar(150),
+    deliverAdress varchar(150),
+    primary KEY(clientID)
+)engine=innodb;
+
+
+
+CREATE TABLE stock
+(
+    stockId INT,
+    lastUpdate DATE,
+ primary KEY(stockID)
+
+)engine=innodb;
+
+CREATE TABLE restaurant
+(
+    restaurantID INT,
+
+stockID INT,
+
+    adress varchar(150),
+    phoneNumber varchar(30),
+primary KEY(restaurantID),
+FOREIGN KEY ( stockID ) REFERENCES stock ( stockID ) ON UPDATE  NO ACTION  ON DELETE  CASCADE
+)engine=innodb;
+
+CREATE TABLE employee
+(
+    employeeID INT,
+    name varchar(50),
+    firstName  varchar(50),
+    emailAdress  varchar(150),
+    age INT,
+    state ENUM('working', 'absent', 'not working'),
+   recruitmentDate DATE,
+restaurantID INT,
+ primary KEY(employeeID),
+    FOREIGN KEY ( restaurantID ) REFERENCES restaurant ( restaurantID ) ON UPDATE  NO ACTION  ON DELETE  CASCADE
+)engine=innodb;
+
+CREATE TABLE ingredient
+(
+    ingredientID INT,
+    name  varchar(50),
+descritpion TEXT,
+    quantity  varchar(50),
+    stockID INT,
+ primary KEY(ingredientID),
+    FOREIGN KEY ( stockID ) REFERENCES stock ( stockID ) ON UPDATE  NO ACTION  ON DELETE  CASCADE
+)engine=innodb;
+
+CREATE TABLE product
+(
+    productID INT,
+    name  varchar(50),
+    description  varchar(50),
+
+    price INT,
+ primary KEY(productID)
+)engine=innodb;
+
+CREATE TABLE recipe
+(
+   productID INT,
+    ingredientID INT,
+ primary KEY(productID, ingredientID),
+    FOREIGN KEY ( ingredientID ) REFERENCES ingredient ( ingredientID ) ON UPDATE  NO ACTION  ON DELETE  CASCADE,
+   FOREIGN KEY ( productID ) REFERENCES product ( productID ) ON UPDATE  NO ACTION  ON DELETE  CASCADE
+)engine=innodb;
+
+
+
+CREATE TABLE cooker
+(
+    employeeID INT,
+    primary key (employeeID),
+    FOREIGN KEY ( employeeID ) REFERENCES employee ( employeeID ) ON UPDATE  NO ACTION  ON DELETE  CASCADE
+   
+)engine=innodb;
+
+CREATE TABLE deliverer
+(
+    employeeID INT,
+    state ENUM('working', 'delivering', 'not working'),
+    localisation  varchar(50),
+    
+    primary key (employeeID),
+    FOREIGN KEY ( employeeID ) REFERENCES employee ( employeeID ) ON UPDATE  NO ACTION  ON DELETE  CASCADE
+)engine=innodb;
+
+CREATE TABLE teller
+
+( 
+    employeeID INT,
+    primary key (employeeID),
+    FOREIGN KEY ( employeeID ) REFERENCES employee ( employeeID ) ON UPDATE  NO ACTION  ON DELETE  CASCADE
+   
+)engine=innodb;
+
+CREATE TABLE manager
+
+( 
+    employeeID INT,
+    authorizations ENUM('R', 'CR', 'CRU', 'CRUD'),
+    primary key (employeeID),
+    FOREIGN KEY ( employeeID ) REFERENCES employee ( employeeID ) ON UPDATE  NO ACTION  ON DELETE  CASCADE
+   
+)engine=innodb;
+
+CREATE TABLE orders
+(
+    orderID INT,
+restaurantID INT,
+    description  varchar(200),
+    state  ENUM('payed', 'waiting for payment', 'in preparation', 'phone order', 'in delivery', 'delivered', 'delivered by hand'),
+    price INT,
+date DATE,
+
+    clientID INT,
+PRIMARY KEY(orderID),
+   FOREIGN KEY ( restaurantID ) REFERENCES restaurant ( restaurantID ) ON UPDATE  NO ACTION  ON DELETE  CASCADE,
+
+FOREIGN KEY ( clientID ) REFERENCES client ( clientID ) ON UPDATE  NO ACTION  ON DELETE  CASCADE
+
+)engine=innodb;
+
+CREATE TABLE includes
+(
+    productID INT,
+    orderID INT,
+ primary KEY(productID, orderID),
+    FOREIGN KEY ( orderID ) REFERENCES orders ( orderID ) ON UPDATE  NO ACTION  ON DELETE  CASCADE,
+   FOREIGN KEY ( productID ) REFERENCES product ( productID ) ON UPDATE  NO ACTION  ON DELETE  CASCADE
+)engine=innodb;
+
+CREATE TABLE cookedOrder
+(
+    orderID int,
+    employeeID int,
+    date date,
+    lastUpdate date,
+    primary KEY(orderID, employeeID),
+    FOREIGN KEY ( orderID ) REFERENCES orders ( orderID ) ON UPDATE  NO ACTION  ON DELETE  CASCADE,
+   FOREIGN KEY ( employeeID ) REFERENCES cooker ( employeeID ) ON UPDATE  NO ACTION  ON DELETE  CASCADE
+)engine=innodb;
+
+CREATE TABLE deliveredOrder
+(
+     orderID int,
+    employeeID int,
+    date date,
+    lastUpdate date,
+    primary KEY(orderID, employeeID),
+    FOREIGN KEY ( orderID ) REFERENCES orders ( orderID ) ON UPDATE  NO ACTION  ON DELETE  CASCADE,
+   FOREIGN KEY ( employeeID ) REFERENCES deliverer ( employeeID ) ON UPDATE  NO ACTION  ON DELETE  CASCADE
+)engine=innodb;
+
+CREATE TABLE managedOrder
+(
+     orderID int,
+    employeeID int,
+    date date,
+    lastUpdate date,
+    primary KEY(orderID, employeeID),
+    FOREIGN KEY ( orderID ) REFERENCES orders ( orderID ) ON UPDATE  NO ACTION  ON DELETE  CASCADE,
+   FOREIGN KEY ( employeeID ) REFERENCES manager ( employeeID ) ON UPDATE  NO ACTION  ON DELETE  CASCADE
+)engine=innodb;
+
+CREATE TABLE createdOrder
+(
+      orderID int,
+    employeeID int,
+    date date,
+    lastUpdate date,
+    primary KEY(orderID, employeeID),
+    FOREIGN KEY ( orderID ) REFERENCES orders ( orderID ) ON UPDATE  NO ACTION  ON DELETE  CASCADE,
+   FOREIGN KEY ( employeeID ) REFERENCES teller ( employeeID ) ON UPDATE  NO ACTION  ON DELETE  CASCADE
+)engine=innodb;
+
+CREATE TABLE payment
+(
+    paymentID int,
+    paymentMode  varchar(50),
+    paymentInformations  varchar(50),
+orderID int,
+    PRIMARY KEY(paymentID),
+    FOREIGN KEY ( orderID ) REFERENCES orders ( orderID ) ON UPDATE  NO ACTION  ON DELETE  CASCADE
+)engine=innodb;
